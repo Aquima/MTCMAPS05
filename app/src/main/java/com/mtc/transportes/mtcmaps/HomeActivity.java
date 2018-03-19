@@ -33,9 +33,11 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class HomeActivity extends AppCompatActivity {
+    private static final int ERROR_DIALOG_REQUEST = 9001;
     TextView textDistrict;
     RecyclerView recyclerView;
     Button btnMapas;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,9 +47,29 @@ public class HomeActivity extends AppCompatActivity {
         recyclerView = findViewById(R.id.rvAddress);
         recyclerView.setLayoutManager(new LinearLayoutManager(this,LinearLayoutManager.VERTICAL,false));
         btnMapas.setVisibility(View.INVISIBLE);
-       // this.getPermmission();
-     }
 
+       // this.getPermmission();
+        if (isGoogleServiceEnabled()){
+            btnMapas.setVisibility(View.VISIBLE);
+            btnMapas.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(HomeActivity.this,MapsMTCActivity.class);
+                    HomeActivity.this.startActivity(intent);
+                }
+            });
+        }
+     }
+    public boolean isGoogleServiceEnabled(){
+        int status = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(HomeActivity.this);
+        if (status == ConnectionResult.SUCCESS){
+            return true;
+        }else if (GoogleApiAvailability.getInstance().isUserResolvableError(status)){
+            Dialog dialog = GoogleApiAvailability.getInstance().getErrorDialog(HomeActivity.this,status,ERROR_DIALOG_REQUEST);
+            dialog.show();
+        }
+        return false;
+    }
     public void getAddressFromDistrict(View view){
         Retrofit.Builder builder = new Retrofit.Builder()
                 .baseUrl(getString(R.string.url_base))
