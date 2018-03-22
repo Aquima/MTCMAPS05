@@ -2,6 +2,7 @@ package com.mtc.transportes.mtcmaps;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Location;
 import android.os.Looper;
 import android.support.annotation.NonNull;
@@ -21,8 +22,12 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.Circle;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polygon;
+import com.google.android.gms.maps.model.PolygonOptions;
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
     @Override
@@ -91,6 +96,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     };
     public void moveCamera(LatLng latlng, float zoom){
         mapCustom.moveCamera(CameraUpdateFactory.newLatLngZoom(latlng,zoom));
+        this.createPolygon(latlng);
     }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -140,6 +146,47 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 initMap();
             }
         }
+    }
+    private Circle circle;
+    public void createCircle(LatLng latLng){
+        circle = mapCustom.addCircle(new CircleOptions()
+                .center(latLng)
+                .radius(100)
+                .strokeColor(Color.BLUE)
+                .fillColor(Color.argb(128,255,0,0))
+                .strokeWidth(10)
+                .clickable(true)
+                );
+        mapCustom.setOnCircleClickListener(new GoogleMap.OnCircleClickListener() {
+            @Override
+            public void onCircleClick(Circle circle) {
+                int strokeColor = polygon.getStrokeColor() ^ 0x00ffffff;
+                polygon.setStrokeColor(strokeColor);
+            }
+        });
+
+    }
+    private Polygon polygon;
+    public void createPolygon(LatLng latLng){
+        PolygonOptions rectOptions = new PolygonOptions()
+                .add(new LatLng(latLng.latitude, latLng.longitude),
+                        new LatLng(latLng.latitude + 0.004, latLng.longitude + 0.002),
+                        new LatLng(latLng.latitude, latLng.longitude + 0.004),
+                        new LatLng(latLng.latitude, latLng.longitude)
+                        );
+        polygon = mapCustom.addPolygon(rectOptions);
+        polygon.setStrokeColor(Color.BLUE);
+        polygon.setFillColor(Color.GREEN);
+        polygon.setClickable(true);
+
+        mapCustom.setOnPolygonClickListener(new GoogleMap.OnPolygonClickListener() {
+            @Override
+            public void onPolygonClick(Polygon polygon) {
+                int strokeColor = polygon.getStrokeColor() ^ 0x00cc6600;
+                polygon.setStrokeColor(strokeColor);
+            }
+        });
+
     }
 
 }
